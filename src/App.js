@@ -26,7 +26,7 @@ export default function App() {
         setError('Please, enter a valid message.')
     }
 
-    const wave = async () => {
+    const handleWave = async () => {
         try {
             if (!validate()) return
 
@@ -235,6 +235,7 @@ export default function App() {
                                 value={message}
                                 rows="4"
                                 onChange={handleMessageChange}
+                                placeholder="Enter your message here, it'll be stored on the blockchain ;)"
                             ></textarea>
                             <div className="text-red-600 text-xs italic">{error}</div>
                         </div>
@@ -245,6 +246,7 @@ export default function App() {
                      */}
                     {!currentAccount ? (
                         <button
+                            type="button"
                             className="w-full max-w-[300px] hover:bg-white hover:text-black border border-black bg-black text-white py-2 px-6 block mx-auto uppercase font-bold"
                             onClick={connectWallet}
                         >
@@ -253,7 +255,8 @@ export default function App() {
                     ) : (
                         <button
                             className="w-full max-w-[300px] hover:bg-white hover:text-black border border-black bg-black text-white py-2 px-6 block mx-auto uppercase font-bold"
-                            onClick={wave}
+                            type="button"
+                            onClick={handleWave}
                             disabled={loading}
                         >
                             Wave at Me
