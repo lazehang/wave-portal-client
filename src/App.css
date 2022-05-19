@@ -1,9 +1,28 @@
+@font-face {
+    font-family: 'Poppins';
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: local('Poppins'),
+        url(https://fonts.gstatic.com/s/poppins/v20/pxiEyp8kv8JHgFVrJJfecnFHGPc.woff2) format('woff2');
+}
+@font-face {
+    font-family: 'Poppins';
+    font-style: normal;
+    font-weight: 700;
+    font-display: swap;
+    src: local('Poppins'),
+        url(https://fonts.gstatic.com/s/poppins/v20/pxiByp8kv8JHgFVrLCz7Z11lFd2JQEl8qw.woff2) format('woff2');
+}
+body {
+    font-family: 'Poppins', sans-serif;
+}
 .mainContainer {
     display: flex;
     justify-content: center;
     width: 100%;
     align-items: center;
-    height: 100vh;
+    min-height: 100vh;
 }
 
 .dataContainer {
@@ -11,15 +30,6 @@
     flex-direction: column;
     justify-content: space-between;
     max-width: 600px;
-    height: 400px;
+    height: 600px;
     padding: 0 15px;
-}
-
-@media screen and (max-width: 767px) {
-    .dataContainer {
-        height: min(100%, 800px);
-    }
-    .waveButton {
-        width: 100%;
-    }
 }
