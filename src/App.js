@@ -83,7 +83,6 @@ export default function App() {
 
             console.log('Connected', accounts[0])
             setCurrentAccount(accounts[0])
-            getAllWaves()
         } catch (error) {
             console.log(error)
         }
@@ -153,6 +152,8 @@ export default function App() {
      * Listen in for emitter events!
      */
     useEffect(() => {
+        checkIfWalletIsConnected()
+
         let wavePortalContract
         const onNewWave = (from, timestamp, message) => {
             console.log('NewWave', from, timestamp, message)
@@ -173,8 +174,6 @@ export default function App() {
             wavePortalContract = new ethers.Contract(contractAddress, contractABI, signer)
             wavePortalContract.on('NewWave', onNewWave)
         }
-
-        checkIfWalletIsConnected()
 
         return () => {
             if (wavePortalContract) {
