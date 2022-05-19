@@ -1,6 +1,6 @@
-# Getting Started with Create React App
+# Wave Portal Client App
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+Depolyed [HERE.](https://wave-portal-client-pi.vercel.app/)
 
 ## Available Scripts
 
