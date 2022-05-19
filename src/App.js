@@ -107,6 +107,7 @@ export default function App() {
              * Check if we're authorized to access the user's wallet
              */
             const accounts = await ethereum.request({ method: 'eth_accounts' })
+            console.log({ accounts })
 
             if (accounts.length !== 0) {
                 const account = accounts[0]
@@ -120,7 +121,6 @@ export default function App() {
             console.log(error)
         }
     }
-
     const getAllWaves = async () => {
         const { ethereum } = window
 
@@ -130,7 +130,6 @@ export default function App() {
                 const signer = provider.getSigner()
                 const wavePortalContract = new ethers.Contract(contractAddress, contractABI, signer)
                 const waves = await wavePortalContract.getAllWaves()
-
                 const wavesCleaned = waves.map(wave => {
                     return {
                         address: wave.waver,
@@ -148,12 +147,14 @@ export default function App() {
         }
     }
 
+    useEffect(() => {
+        checkIfWalletIsConnected()
+    }, [])
+
     /**
      * Listen in for emitter events!
      */
     useEffect(() => {
-        checkIfWalletIsConnected()
-
         let wavePortalContract
         const onNewWave = (from, timestamp, message) => {
             console.log('NewWave', from, timestamp, message)
@@ -180,7 +181,7 @@ export default function App() {
                 wavePortalContract.off('NewWave', onNewWave)
             }
         }
-    }, [])
+    }, [contractABI])
 
     return (
         <div className="mainContainer text-center">
@@ -220,7 +221,7 @@ export default function App() {
                 ) : null}
 
                 {loading && (
-                    <div className="absolute top-0 left-0 w-full h-full bg-black bg-opacity-50 text-white flex justify-center items-center">
+                    <div className="fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 text-white flex justify-center items-center">
                         <div className="animate-pulse">...Loading</div>
                     </div>
                 )}
