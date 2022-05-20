@@ -1,22 +1,15 @@
 import React, { useEffect, useState } from 'react'
 import './App.css'
-import { ethers } from 'ethers'
-import abi from './utils/WavePortal.json'
+import useWallet from './hooks/useWallet'
 
 export default function App() {
-    const [currentAccount, setCurrentAccount] = useState('')
-
     const [loading, setLoading] = useState(false)
-
-    const [allWaves, setAllWaves] = useState([])
 
     const [message, setMessage] = useState('')
 
     const [error, setError] = useState('')
 
-    const contractAddress = process.env.REACT_APP_CONTRACT_ADDRESS
-
-    const contractABI = abi.abi
+    const { wave, connectWallet, currentAccount, allWaves, totalWaves } = useWallet()
 
     const validate = () => {
         if (message.length) {
@@ -29,36 +22,9 @@ export default function App() {
     const handleWave = async () => {
         try {
             if (!validate()) return
-
-            const { ethereum } = window
-
-            if (ethereum) {
-                setLoading(true)
-                await ethereum.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: '0x4' }] })
-                const provider = new ethers.providers.Web3Provider(ethereum)
-                const signer = provider.getSigner()
-                const wavePortalContract = new ethers.Contract(contractAddress, contractABI, signer)
-
-                let count = await wavePortalContract.getTotalWaves()
-                console.log('Retrieved total wave count...', count.toNumber())
-
-                /*
-                 * Execute the actual wave from your smart contract
-                 */
-                const waveTxn = await wavePortalContract.wave(message, { gasLimit: 300000 })
-
-                console.log('Mining...', waveTxn.hash)
-
-                await waveTxn.wait()
-                console.log('Mined -- ', waveTxn.hash)
-
-                count = await wavePortalContract.getTotalWaves()
-                console.log('Retrieved total wave count...', count.toNumber())
-
-                setMessage('')
-            } else {
-                console.log("Ethereum object doesn't exist!")
-            }
+            setLoading(true)
+            await wave(message)
+            setMessage('')
         } catch (error) {
             setError('Transaction failed! come back again after 15 minutes')
             console.log(error)
@@ -67,158 +33,56 @@ export default function App() {
         }
     }
 
-    /**
-     * Implement your connectWallet method here
-     */
-    const connectWallet = async () => {
-        try {
-            const { ethereum } = window
-
-            if (!ethereum) {
-                alert('Get MetaMask!')
-                return
-            }
-
-            const accounts = await ethereum.request({
-                method: 'eth_requestAccounts'
-            })
-
-            console.log('Connected', accounts[0])
-            setCurrentAccount(accounts[0])
-        } catch (error) {
-            console.log(error)
-        }
-    }
-
     const handleMessageChange = event => {
         setMessage(event.target.value)
     }
-
-    const checkIfWalletIsConnected = async () => {
-        try {
-            const { ethereum } = window
-
-            if (!ethereum) {
-                console.log('Make sure you have metamask!')
-                return
-            } else {
-                console.log('We have the ethereum object', ethereum)
-            }
-
-            /*
-             * Check if we're authorized to access the user's wallet
-             */
-            const accounts = await ethereum.request({ method: 'eth_accounts' })
-            console.log({ accounts })
-
-            if (accounts.length !== 0) {
-                const account = accounts[0]
-                console.log('Found an authorized account:', account)
-                setCurrentAccount(account)
-                getAllWaves()
-            } else {
-                console.log('No authorized account found')
-            }
-        } catch (error) {
-            console.log(error)
-        }
-    }
-    const getAllWaves = async () => {
-        const { ethereum } = window
-
-        try {
-            if (ethereum) {
-                const provider = new ethers.providers.Web3Provider(ethereum)
-                const signer = provider.getSigner()
-                const wavePortalContract = new ethers.Contract(contractAddress, contractABI, signer)
-                const waves = await wavePortalContract.getAllWaves()
-                const wavesCleaned = waves.map(wave => {
-                    return {
-                        address: wave.waver,
-                        timestamp: new Date(wave.timestamp * 1000),
-                        message: wave.message
-                    }
-                })
-
-                setAllWaves(wavesCleaned)
-            } else {
-                console.log("Ethereum object doesn't exist!")
-            }
-        } catch (error) {
-            console.log(error)
-        }
-    }
-
-    useEffect(() => {
-        checkIfWalletIsConnected()
-    }, [])
-
-    /**
-     * Listen in for emitter events!
-     */
-    useEffect(() => {
-        let wavePortalContract
-        const onNewWave = (from, timestamp, message) => {
-            console.log('NewWave', from, timestamp, message)
-            setAllWaves(prevState => [
-                ...prevState,
-                {
-                    address: from,
-                    timestamp: new Date(timestamp * 1000),
-                    message: message
-                }
-            ])
-        }
-
-        if (window.ethereum) {
-            const provider = new ethers.providers.Web3Provider(window.ethereum)
-            const signer = provider.getSigner()
-
-            wavePortalContract = new ethers.Contract(contractAddress, contractABI, signer)
-            wavePortalContract.on('NewWave', onNewWave)
-        }
-
-        return () => {
-            if (wavePortalContract) {
-                wavePortalContract.off('NewWave', onNewWave)
-            }
-        }
-    }, [contractABI])
 
     return (
         <div className="mainContainer text-center">
             <div className="dataContainer">
                 <div className="header text-[32px] my-5 font-bold">
-                    <span role="img" aria-label="hi emoji">
+                    <span role="img" aria-label="hi emoji" className="text-[50px]">
                         👋
                     </span>{' '}
                     Hey there!
                 </div>
 
                 <div className="bio opacity-75 font-light mb-5">
-                    I am lazehang.
+                    I am lazehang, learning web3.
                     <br />
                     Connect your Ethereum wallet and wave at me!
                 </div>
 
+                {totalWaves && (
+                    <div className="mb-2">
+                        Total{' '}
+                        <span role="img" aria-label="hi emoji">
+                            👋
+                        </span>
+                        's {totalWaves}
+                    </div>
+                )}
+
                 {allWaves.length ? (
-                    <div className="mb-4">
-                        {allWaves.map((wave, index) => {
-                            return (
-                                <div
-                                    key={index}
-                                    style={{
-                                        backgroundColor: 'OldLace',
-                                        padding: '8px'
-                                    }}
-                                    className="w-full mb-2 p-4 text-left text-sm"
-                                >
-                                    <div>Address: {wave.address}</div>
-                                    <div>Time: {wave.timestamp.toString()}</div>
-                                    <div>Message: {wave.message}</div>
-                                </div>
-                            )
-                        })}
+                    <div className="wave-messages">
+                        <div className="wave-messages-overlay" />
+                        <div className="mb-4 max-h-[200px] overflow-y-scroll flex flex-col-reverse">
+                            {allWaves.map((wave, index) => {
+                                return (
+                                    <div
+                                        key={index}
+                                        style={{
+                                            backgroundColor: 'OldLace'
+                                        }}
+                                        className="w-full mb-2 p-4 text-left text-sm rounded-lg"
+                                    >
+                                        <div className="break-words">Address: {wave.address}</div>
+                                        <div>Time: {wave.timestamp.toString()}</div>
+                                        <div>Message: {wave.message}</div>
+                                    </div>
+                                )
+                            })}
+                        </div>
                     </div>
                 ) : null}
 

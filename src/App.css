@@ -30,6 +30,20 @@ body {
     flex-direction: column;
     justify-content: space-between;
     max-width: 600px;
-    height: 600px;
+    min-height: 600px;
     padding: 0 15px;
+    width: 100%;
+}
+.wave-messages {
+    position: relative;
+}
+.wave-messages-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 10px;
+    background: linear-gradient(#9f9f9f, 20%, transparent);
+    border-top-left-radius: 0.25rem; /* 4px */
+    border-top-right-radius: 0.25rem;
 }
