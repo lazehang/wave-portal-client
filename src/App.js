@@ -34,6 +34,7 @@ export default function App() {
 
             if (ethereum) {
                 setLoading(true)
+                await ethereum.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: '0x4' }] })
                 const provider = new ethers.providers.Web3Provider(ethereum)
                 const signer = provider.getSigner()
                 const wavePortalContract = new ethers.Contract(contractAddress, contractABI, signer)
@@ -59,6 +60,7 @@ export default function App() {
                 console.log("Ethereum object doesn't exist!")
             }
         } catch (error) {
+            setError('Transaction failed! come back again after 15 minutes')
             console.log(error)
         } finally {
             setLoading(false)
